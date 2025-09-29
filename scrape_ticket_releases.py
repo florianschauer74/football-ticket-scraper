@@ -19,7 +19,7 @@ import pygsheets
 
 # --- Konfiguration (kommt von GitHub Actions ENV) ---
 SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
-SHEET_ID = os.getenv("SHEET_ID")  # <-- WICHTIG: Wir arbeiten mit der ID
+SHEET_ID = os.getenv("SHEET_ID")  # <-- wir arbeiten mit der ID
 SOURCES_SHEET_NAME = os.getenv("SOURCES_SHEET_NAME", "Sources")
 OUTPUT_SHEET = os.getenv("OUTPUT_SHEET", "Games")
 HEADLESS = os.getenv("HEADLESS", "true").lower() in ("1", "true", "yes")
@@ -51,7 +51,7 @@ def ensure_output_sheet(sh):
             "Flug Optionen (ab Wien)", "Hotel Optionen (pro Nacht)",
             "Notizen", "QuelleURL", "Letzte Prüfung"
         ]
-        ws.append_table([headers], start="A1")
+        ws.update_row(1, headers)  # <-- Fix statt append_table()
         return ws
 
 def get_source_urls(sh):
