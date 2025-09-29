@@ -1,0 +1,30 @@
+name: Fetch Fixtures
+
+on:
+  workflow_dispatch:   # Manuell starten über Actions-Tab
+
+jobs:
+  fetch-fixtures:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run fixture fetcher
+        env:
+          SERVICE_ACCOUNT_FILE: service_account.json
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          OUTPUT_SHEET: Games
+          FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+        run: |
+          python fetch_fixtures.py
