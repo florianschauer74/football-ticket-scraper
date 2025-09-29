@@ -2,8 +2,8 @@ name: Scheduled Ticket Scrape
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # Läuft täglich um 08:00 UTC (09:00 Wien-Zeit im Winter, 10:00 im Sommer)
-  workflow_dispatch:       # Manuelles Starten im GitHub-UI
+    - cron: '0 8 * * *'   # Läuft täglich um 08:00 UTC
+  workflow_dispatch:       # Manuelles Starten möglich
 
 jobs:
   run-scrape:
@@ -32,7 +32,7 @@ jobs:
       - name: Run scraper
         env:
           SERVICE_ACCOUNT_FILE: service_account.json
-          SHEET_NAME: Matchday Research Board
+          SHEET_ID: 16TCNvVT6lIUFKFqsVyAE7GJWTotwAQ7JpkISUN9jMAU
           SOURCES_SHEET_NAME: Sources
           OUTPUT_SHEET: Games
         run: |
