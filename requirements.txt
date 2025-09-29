@@ -1,0 +1,6 @@
+playwright
+pygsheets
+beautifulsoup4
+dateparser
+python-dotenv
+requests
