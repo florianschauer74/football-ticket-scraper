@@ -11,7 +11,6 @@ import os
 import re
 import time
 import logging
-from urllib.parse import urlparse
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 from bs4 import BeautifulSoup
@@ -20,7 +19,7 @@ import pygsheets
 
 # --- Konfiguration (kommt von GitHub Actions ENV) ---
 SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
-SHEET_NAME = os.getenv("SHEET_NAME", "Matchday Research Board")
+SHEET_ID = os.getenv("SHEET_ID")  # <-- WICHTIG: Wir arbeiten mit der ID
 SOURCES_SHEET_NAME = os.getenv("SOURCES_SHEET_NAME", "Sources")
 OUTPUT_SHEET = os.getenv("OUTPUT_SHEET", "Games")
 HEADLESS = os.getenv("HEADLESS", "true").lower() in ("1", "true", "yes")
@@ -31,15 +30,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 # --- Keywords & Muster ---
 TICKET_KEYWORDS = r'presale|pre[-\s]?sale|general sale|on sale|tickets on sale|ticket(s)? available|vorverkauf|tickets jetzt|ticketverkauf'
 DATE_PATTERNS = [
-    r'\b(\d{1,2}\.\s?\d{1,2}\.\s?\d{2,4})\b',  # 12.10.2025
+    r'\b(\d{1,2}\.\s?\d{1,2}\.\s?\d{2,4})\b',
     r'\b(\d{1,2}\s(?:January|February|March|April|May|June|July|August|September|October|November|December)\s?\d{2,4})\b',
-    r'\b([A-Za-z]{3,9}\s\d{1,2},\s?\d{4})\b'   # October 12, 2025
+    r'\b([A-Za-z]{3,9}\s\d{1,2},\s?\d{4})\b'
 ]
 
 # --- Hilfsfunktionen ---
 def init_sheets():
     gc = pygsheets.authorize(service_account_file=SERVICE_ACCOUNT_FILE)
-    return gc.open(SHEET_NAME)
+    return gc.open_by_key(SHEET_ID)  # <-- statt open(name)
 
 def ensure_output_sheet(sh):
     try:
@@ -59,7 +58,7 @@ def get_source_urls(sh):
     try:
         ws = sh.worksheet_by_title(SOURCES_SHEET_NAME)
         vals = ws.get_col(1, include_tailing_empty=False)
-        return vals[1:]  # erste Zeile = Header
+        return vals[1:]  # Erste Zeile ist Header
     except Exception as e:
         logging.error("Keine Sources gefunden: %s", e)
         return []
@@ -125,7 +124,7 @@ def main():
             continue
         parsed = parse_page_content(html, url)
         row = [
-            parsed.get("title") or "",  # Spiel
+            parsed.get("title") or "",
             "", "", "",                 # Datum, Wettbewerb, Stadion
             parsed.get("ticket_date", ""),
             "Clubseite",
